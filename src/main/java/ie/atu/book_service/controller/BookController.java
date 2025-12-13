@@ -9,53 +9,63 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RequestMapping("/book")
 @RestController
 public class BookController {
 
     private final BookService bookService;
+
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
     @GetMapping("/getAllBooks")
     public ResponseEntity<List<Book>> getAllBooks() {
+
         return ResponseEntity.ok(bookService.findAll());
+
     }
 
-    @GetMapping("/getBook")
-    public ResponseEntity<?> getOne(@RequestParam("id") String id) {
-        Optional<Book> maybe = bookService.findById(id);
-        if (maybe.isPresent()) {
-            return ResponseEntity.ok(maybe.get());
-        }else{
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOne(@RequestParam("id") Long id) {
 
-            throw new NotFoundException("Book ID doesn't exist");
-        }
+        return ResponseEntity.ok(bookService.findById(id));
+
     }
 
     @PostMapping("/createBook")
     public ResponseEntity<?> createBook(@Valid @RequestBody Book book) {
+
         Book created =  bookService.create(book);
+
         return ResponseEntity
                 .created(URI.create("/api/books/" + created.getBookID()))
                 .body("Book created with id " + created.getBookID());
+
     }
 
     @PutMapping("/updateBook")
     public ResponseEntity<?> updateBook(@Valid @RequestBody Book book) {
-            bookService.update(book);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Book updated with id " + book.getBookID());
+
+        bookService.update(book);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Book updated with id " + book.getBookID());
+
+
     }
 
     @DeleteMapping("/deleteBook")
-    public ResponseEntity<?> deleteBook(@RequestParam("id") String id) {
-            bookService.delete(id);
-            return ResponseEntity.status(HttpStatus.OK).body("Book deleted with id " + id);
+    public ResponseEntity<?> deleteBook(@RequestParam("id") Long id) {
+
+        bookService.delete(id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Book deleted with id " + id);
+
     }
+
 
 }

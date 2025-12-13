@@ -1,56 +1,67 @@
 package ie.atu.book_service.service;
 
 
-import ie.atu.book_service.ErrorHandling.DuplicateExceptionHandling;
 import ie.atu.book_service.ErrorHandling.NotFoundException;
 import ie.atu.book_service.model.Book;
+import ie.atu.book_service.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BookService {
 
-    private final List<Book> books = new ArrayList<>();
+    private final BookRepository bookRepository;
 
-    public List<Book> findAll() {
-        return new ArrayList<>(books);
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
-    public Optional<Book> findById(String id) {
-        for (Book book : books) {
-            if(book.getBookID().equals(id)) {
-                return Optional.of(book);
-            }
-        }
-        return Optional.empty();
+    public List<Book> findAll() {
+
+        return bookRepository.findAll();
+
+    }
+
+    public Book findById(Long id) {
+
+        return bookRepository.findByBookID(id)
+                .orElseThrow(() -> new NotFoundException("Book Not Found"));
+
     }
 
     public Book create(Book book) {
-        if(findById(book.getBookID()).isPresent()) {
-            throw new DuplicateExceptionHandling("Book ID with " + book.getBookID() + " already exists");
-        }else{
-            books.add(book);
-            return book;
-        }
+
+        return bookRepository.save(book);
+
+
     }
 
     public void update(Book book) {
-        if(findById(book.getBookID()).isPresent()) {
-            books.set(books.indexOf(findById(book.getBookID()).get()), book);
-        } else{
-            throw new NotFoundException("Book ID doesn't exist");
-        }
+
+        Book existingBook = findById(book.getBookID());
+
+        existingBook.setBookID(book.getBookID());
+        existingBook.setAuthor(book.getAuthor());
+        existingBook.setName(book.getName());
+        existingBook.setPublisher(book.getPublisher());
+
+
+        bookRepository.save(existingBook);
     }
 
-    public void delete(String id) {
-        if (findById(id).isPresent()) {
-            books.remove(findById(id).get());
-        } else{
-            throw new NotFoundException("Book ID doesn't exist");
-        }
+    public void delete(Long id) {
+
+        Book deletedBook = findById(id);
+
+        bookRepository.delete(deletedBook);
     }
+
+
+
+
+
+
+
 
 }
