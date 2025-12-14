@@ -25,11 +25,10 @@ public class BookService {
     }
 
     public Book findById(Long id) {
-
-        return bookRepository.findByBookID(id)
+        return bookRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Book Not Found"));
-
     }
+
 
     public Book create(Book book) {
 
@@ -39,17 +38,15 @@ public class BookService {
     }
 
     public void update(Book book) {
-
         Book existingBook = findById(book.getBookID());
 
-        existingBook.setBookID(book.getBookID());
-        existingBook.setAuthor(book.getAuthor());
         existingBook.setName(book.getName());
+        existingBook.setAuthor(book.getAuthor());
         existingBook.setPublisher(book.getPublisher());
-
 
         bookRepository.save(existingBook);
     }
+
 
     public void delete(Long id) {
 
